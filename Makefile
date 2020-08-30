@@ -18,6 +18,10 @@ lint:
 test:
 	@pipenv run pytest
 
+.PHONY: docker-image
+docker-image:
+	@docker build . -t webcheck
+
 .PHONY: fixtures
 fixtures:
 	@pipenv run ./fixtures.sh
