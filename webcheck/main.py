@@ -1,2 +1,5 @@
+from webcheck.cli import app
+
+
 def main():
-    print("123")
+    app()
