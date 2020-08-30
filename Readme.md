@@ -51,6 +51,6 @@
     make results_worker
     ```
 1. In order to see the internals of the db use 
-    ```
+    ```shell
     pipenv run webcheckctl --help
     ```
