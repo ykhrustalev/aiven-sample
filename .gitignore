@@ -1,7 +1,10 @@
 .idea/
+.cache/
+.venv/
 .coverage
 htmlcov/
 .pytest_cache
 *.pyc
 *.egg-info/
 build/
+.envrc

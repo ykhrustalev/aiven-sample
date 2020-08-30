@@ -18,6 +18,7 @@ python-dateutil = "*"
 requests = "*"
 webcheck = {editable = true, path = "."}
 PyYAML = "*"
+cerberus = "*"
 
 [requires]
 python_version = "3.8"

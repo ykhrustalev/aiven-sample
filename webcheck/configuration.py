@@ -1,63 +1,101 @@
 import abc
-from dataclasses import dataclass, fields
-
 import typing
+from dataclasses import dataclass, fields, field
+
 import yaml
 
-
-class Section(abc.ABC):
-    def validate(self):
-        pass
+from webcheck.validation import validate, ValidationError
 
 
 class Error(Exception):
     pass
 
 
-@dataclass(frozen=True)
-class Database(Section):
-    host: str
-    name: str
-    username: str
-    password: str
-    port: int = 5432
+class Section(abc.ABC):
+    def scheme(self):
+        pass
+
+    def allow_unknown(self):
+        return False
 
     def validate(self):
-        if not self.host:
-            raise Error("'host' should be set")
-
-        if not self.name:
-            raise Error("'name' should be set")
-
-        if not self.username:
-            raise Error("'username' should be set")
-
         try:
-            int(self.port)
-        except ValueError:
-            raise Error("'port' should be int")
+            validate(self.scheme(), self, allow_unknown=self.allow_unknown())
+        except ValidationError as e:
+            raise Error(e)
+
+
+@dataclass(frozen=True)
+class Database(Section):
+    url: str = ''
+
+    def scheme(self):
+        return dict(url=dict(type='string', empty=False))
+
+
+@dataclass(frozen=True)
+class HttpChecker(Section):
+    timeout: int = 30
+    allow_redirects: bool = True
+
+    def scheme(self):
+        return dict(
+            timeout=dict(type='integer', min=1),
+            allow_redirects=dict(type='boolean'),
+        )
+
+
+@dataclass(frozen=True)
+class Kafka(Section):
+    servers: typing.List[str]
+    topic_checks: str = "monitoring_checks"
+    topic_results: str = "monitoring_results"
+    producers_options: typing.Dict[str, typing.Any] = \
+        field(default_factory=dict)
+    consumers_options: typing.Dict[str, typing.Any] = \
+        field(default_factory=dict)
+
+    def allow_unknown(self):
+        return True
+
+    def scheme(self):
+        return dict(
+            servers=dict(
+                type='list',
+                minlength=1,
+                required=True,
+                schema={'type': 'string'},
+            ),
+            topic_checks=dict(type='string', empty=False),
+            topic_results=dict(type='string', empty=False),
+        )
 
 
 @dataclass(frozen=True)
 class Logging(Section):
     destination: typing.Any = None
     level: str = "info"
+    format: str = ''
 
-    ALLOWED_LEVELS = ('debug', 'info', 'warning')
-
-    def validate(self):
-        if self.level not in self.ALLOWED_LEVELS:
-            raise Error(f"'level' should be in {self.ALLOWED_LEVELS}")
+    def scheme(self):
+        return dict(
+            destination=dict(type='string', nullable=True),
+            level=dict(type='string', allowed=['debug', 'info', 'warning']),
+            format=dict(type='string', nullable=True),
+        )
 
 
 @dataclass(frozen=True)
-class State(Section):
+class State:
     database: Database
+    http_checker: HttpChecker
+    kafka: Kafka
     logging: Logging
 
     def validate(self):
         for section in fields(self):
-            getattr(self, section.name).validate()
+            sec = getattr(self, section.name)
+            sec.validate()
 
 
 def _load_section(cls, data, name):
@@ -83,7 +121,9 @@ def load(path: str) -> State:
 
     state = State(
         database=_load_section(Database, data, 'database'),
-        logging=_load_section(Logging, data, 'logging')
+        kafka=_load_section(Kafka, data, 'kafka'),
+        http_checker=_load_section(HttpChecker, data, 'http_checker'),
+        logging=_load_section(Logging, data, 'logging'),
     )
     state.validate()
 
