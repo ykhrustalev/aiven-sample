@@ -56,5 +56,5 @@
     ```
     Some shortcuts:
     * `make websites-list`
-    * `make make-list`
+    * `make checks-list`
     * `make results-list`
