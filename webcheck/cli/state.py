@@ -27,6 +27,11 @@ class State:
 
     @property
     @lazy
+    def migrator(self):
+        return database.Migrator(self.db_conn)
+
+    @property
+    @lazy
     def repo_websites(self) -> repositories.Websites:
         return repositories.Websites(self.db_conn)
 

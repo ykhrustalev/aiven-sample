@@ -33,8 +33,6 @@ def create(
     expect_http_code,
     expect_body_pattern,
 ):
-    repo = state.repo_checks
-
     def job():
         obj = Check(
             website_id=website_id,
@@ -44,7 +42,7 @@ def create(
             expect_body_pattern=expect_body_pattern,
         )
         try:
-            obj = repo.create(obj)
+            obj = state.repo_checks.create(obj)
             say(f'created {obj}')
         except DoesNotExistError:
             errsay("referenced website doesn't exist")
@@ -62,11 +60,9 @@ def create(
 @pass_state
 def delete(state: State, pk, website_id):
     def job():
-        repo = state.repo_checks
-
         if pk:
             try:
-                repo.delete_by_id(pk)
+                state.repo_checks.delete_by_id(pk)
                 say('deleted checks')
             except DoesNotExistError:
                 errsay(f'no such check {pk}')
@@ -74,7 +70,7 @@ def delete(state: State, pk, website_id):
 
         if website_id:
             try:
-                repo.delete_for_website_id(website_id)
+                state.repo_checks.delete_for_website_id(website_id)
                 say('deleted checks')
             except DoesNotExistError:
                 errsay(f'no checks for {website_id}')

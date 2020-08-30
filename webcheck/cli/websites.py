@@ -21,11 +21,9 @@ def group():
 @click.option('--hostname', help='A hostname to add', required=True)
 @pass_state
 def create(state: State, hostname):
-    repo = state.repo_websites
-
     def job():
         try:
-            obj = repo.create(Website(hostname=hostname))
+            obj = state.repo_websites.create(Website(hostname=hostname))
             say(f'created {obj}')
         except UniqueConstraintError:
             errsay('such website already registered')
@@ -43,11 +41,9 @@ def create(state: State, hostname):
 @pass_state
 def delete(state: State, pk, hostname):
     def job():
-        repo = state.repo_websites
-
         if pk:
             try:
-                repo.delete_by_id(pk)
+                state.repo_websites.delete_by_id(pk)
             except DoesNotExistError:
                 errsay('no such website')
                 return 1
@@ -56,7 +52,7 @@ def delete(state: State, pk, hostname):
 
         if hostname:
             try:
-                repo.delete_by_hostname(hostname)
+                state.repo_websites.delete_by_hostname(hostname)
             except DoesNotExistError:
                 errsay('no such website')
                 return 1
@@ -70,9 +66,7 @@ def delete(state: State, pk, hostname):
 @pass_state
 def select(state: State):
     def job():
-        repo = state.repo_websites
-
-        for obj in repo.list():
+        for obj in state.repo_websites.list():
             say(obj)
 
     run_job(state, job)

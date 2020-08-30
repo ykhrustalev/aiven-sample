@@ -1,6 +1,8 @@
 import logging
 import time
 
+import click
+
 from .app import app, pass_state, run_job
 from .state import State
 
@@ -13,12 +15,14 @@ def group():
 
 
 @group.command("scheduler")
+@click.option('--interval', type=int, default=20,
+              help='A check interval in seconds')
 @pass_state
-def scheduler(state: State):
+def scheduler(state: State, interval):
     def job():
         while True:
             state.monitoring_scheduler.schedule()
-            time.sleep(10)
+            time.sleep(interval)
 
     run_job(state, job)
 
