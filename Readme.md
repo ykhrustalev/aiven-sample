@@ -58,3 +58,12 @@
     * `make websites-list`
     * `make checks-list`
     * `make results-list`
+    
+## Packaging
+
+There is no clearly defined way how to use it, no scripts to build rpm or deb
+out of the box. But there is a Docker image sample which suggests how the app
+could be packaged.
+```shell 
+make docker-image
+```
