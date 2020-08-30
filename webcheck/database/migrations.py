@@ -38,7 +38,7 @@ MIGRATIONS = (
             constraint fk_check_id
                 foreign key(check_id) references checks(id)
                 on delete cascade
-        );
+        ) partition by range (started_at);
         create index idx_results_started_at on results(started_at);
         """,
 
@@ -48,6 +48,28 @@ MIGRATIONS = (
         drop table websites;
         """
     ),
+    Migration(
+        """
+        create table results_2020 partition of results
+            for values from ('2020-01-01') to ('2020-12-31');
+        create index on results_2020 (started_at);
+
+        """,
+        """
+        drop table results_2020;
+        """
+    ),
+    Migration(
+        """
+        create table results_2021plus partition of results
+            for values from ('2021-01-01') to ('2099-12-31');
+        create index on results_2021plus (started_at);
+
+        """,
+        """
+        drop table results_2021plus;
+        """
+    )
 )
 
 
