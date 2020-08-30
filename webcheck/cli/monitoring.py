@@ -1,0 +1,35 @@
+import logging
+import time
+
+from .app import app, pass_state, run_job
+from .state import State
+
+logger = logging.getLogger(__name__)
+
+
+@app.group(name="monitoring")
+def group():
+    pass
+
+
+@group.command("scheduler")
+@pass_state
+def scheduler(state: State):
+    def job():
+        while True:
+            state.monitoring_scheduler.schedule()
+            time.sleep(10)
+
+    run_job(state, job)
+
+
+@group.command("checks_worker")
+@pass_state
+def checks_worker(state: State):
+    run_job(state, lambda: state.monitoring_checks_worker.execute())
+
+
+@group.command("results_worker")
+@pass_state
+def results_worker(state: State):
+    run_job(state, lambda: state.monitoring_results_worker.execute())

@@ -29,33 +29,24 @@ def test_load__empty_file(tmp_path):
     (
         """---
         database:
-            host: ""
-            name: name
-            username: username
-            password: password
+            url: ""
+        kafka:
+            servers:
+              - server1
         """,
-        "'host' should be set"
+        "{'url': \\['empty values not allowed'\\]}"
     ),
     (
         """---
         database:
-            host: host
-            name: ""
-            username: username
-            password: password
+            url: postgres://host
+        kafka:
+            servers:
+              - server1
+        logging:
+            level: foo
         """,
-        "'name' should be set"
-    ),
-    (
-        """---
-        database:
-            host: host
-            name: name
-            port: port
-            username: username
-            password: password
-        """,
-        "'port' should be int"
+        "{'level': \\['unallowed value foo'\\]"
     ),
 ))
 def test_load__fails(tmp_path, raw, match):
@@ -73,18 +64,18 @@ def test_load__fails(tmp_path, raw, match):
     (
         """---
         database:
-            host: host
-            name: name
-            username: username
-            password: password
+            url: postgres://host
+        kafka:
+            servers:
+              - server1
+              - server2
         logging:
             destination: /path/to/file
         """,
         configuration.State(
-            database=configuration.Database(
-                host='host', port=5432, name='name',
-                username='username', password='password'
-            ),
+            database=configuration.Database(url='postgres://host'),
+            kafka=configuration.Kafka(servers=['server1', 'server2']),
+            http_checker=configuration.HttpChecker(),
             logging=configuration.Logging(
                 level='info', destination='/path/to/file'
             ),
@@ -93,22 +84,35 @@ def test_load__fails(tmp_path, raw, match):
     (
         """---
         database:
-            host: host
-            port: 1234
-            name: name
-            username: username
-            password: password
+            url: postgres://host
+        kafka:
+            servers:
+              - server1
+              - server2
+            topic_checks: checks
+            topic_results: results
+        http_checker:
+            timeout: 99
+            allow_redirects: False
         logging:
             level: warning
             destination: /path/to/file
+            format: format
         """,
         configuration.State(
-            database=configuration.Database(
-                host='host', port=1234, name='name',
-                username='username', password='password'
+            database=configuration.Database(url='postgres://host'),
+            kafka=configuration.Kafka(
+                servers=['server1', 'server2'],
+                topic_checks="checks",
+                topic_results="results",
+            ),
+            http_checker=configuration.HttpChecker(
+                timeout=99,
+                allow_redirects=False,
             ),
             logging=configuration.Logging(
-                level='warning', destination='/path/to/file'
+                level='warning', destination='/path/to/file',
+                format='format',
             ),
         )
     ),
