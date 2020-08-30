@@ -1,5 +1,4 @@
 from os import environ
-from urllib.parse import urlparse
 
 import psycopg2
 import pytest
@@ -12,8 +11,12 @@ db_url = environ.get('TEST_DATABASE_URL', '')
 def reset_db(conn):
     with conn:
         with conn.cursor() as cur:
-            parts = urlparse(db_url)
-            cur.execute(f'DROP OWNED BY {parts.username};')
+            cur.execute("""
+            drop table if exists migrations;
+            drop table if exists results;
+            drop table if exists checks;
+            drop table if exists websites;
+            """)
 
 
 @pytest.fixture
