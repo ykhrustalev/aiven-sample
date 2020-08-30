@@ -58,6 +58,17 @@ MIGRATIONS = (
         """
         drop table results_2020;
         """
+    ),
+    Migration(
+        """
+        create table results_2021plus partition of results
+            for values from ('2021-01-01') to ('2099-12-31');
+        create index on results_2021plus (started_at);
+
+        """,
+        """
+        drop table results_2021plus;
+        """
     )
 )
 
