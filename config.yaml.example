@@ -1,10 +1,31 @@
 ---
 database:
-  host: localhost
-  port: 5432
-  name: aiven_interview
-  username: aiven
-  password: aiven
+  url: postgres://user:pass@host:5432/dbname
+
+kafka_security: &kafka_security
+  security_protocol: SSL
+  ssl_certfile: /path/to/service.cert
+  ssl_keyfile: /path/to/service.key
+  ssl_cafile: /path/to/ca.pem
+
+kafka:
+  servers:
+    - kafka.example.com:9028
+
+  topic_checks: monitoring_checks
+  topic_results: monitoring_results
+
+  producers_options:
+    <<: *kafka_security
+
+  consumers_options:
+    enable_auto_commit: true
+    auto_offset_reset: earliest
+    <<: *kafka_security
+
+http_checker:
+  timeout: 30
+  allow_redirects: True
 
 logging:
   level: info
