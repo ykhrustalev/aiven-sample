@@ -54,3 +54,7 @@
     ```shell
     pipenv run webcheckctl --help
     ```
+    Some shortcuts:
+    * `make websites-list`
+    * `make make-list`
+    * `make results-list`

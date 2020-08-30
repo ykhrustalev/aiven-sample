@@ -33,3 +33,15 @@ checks_worker:
 .PHONY: results_worker
 results_worker:
 	@pipenv run webcheckctl monitoring results_worker
+
+.PHONY: websites-list
+websites-list:
+	@pipenv run webcheckctl websites list
+
+.PHONY: checks-list
+checks-list:
+	@pipenv run webcheckctl checks list
+
+.PHONY: results-list
+results-list:
+	@pipenv run webcheckctl results list
