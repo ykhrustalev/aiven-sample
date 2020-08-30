@@ -1,8 +1,5 @@
 # A sample monitor app
 
-## Setting up env
-
-
 ## Development env
 
 1. Setting up env
